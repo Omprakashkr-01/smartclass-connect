@@ -1,7 +1,7 @@
 {
   "students": [
     {
-      "_id": "2gvvkgv29",
+      "_id": "bh96muvqj",
       "studentId": "STU001",
       "name": "Alice Smith",
       "grade": "10th Grade",
@@ -10,7 +10,7 @@
       "parentLanguage": "en"
     },
     {
-      "_id": "6sdml7ixa",
+      "_id": "axe95wfc7",
       "studentId": "STU002",
       "name": "Bob Johnson",
       "grade": "10th Grade",
@@ -19,7 +19,7 @@
       "parentLanguage": "hi"
     },
     {
-      "_id": "ft37pu7cl",
+      "_id": "rkxydrb4y",
       "studentId": "STU003",
       "name": "Charlie Brown",
       "grade": "10th Grade",
@@ -28,7 +28,7 @@
       "parentLanguage": "bho"
     },
     {
-      "_id": "747esjqc3",
+      "_id": "n3ma8j1tk",
       "studentId": "STU004",
       "name": "David Miller",
       "grade": "10th Grade",
@@ -37,7 +37,7 @@
       "parentLanguage": "en"
     },
     {
-      "_id": "7oknrlrk4",
+      "_id": "jv3lv8cjb",
       "studentId": "STU005",
       "name": "Eve Davis",
       "grade": "10th Grade",
@@ -48,7 +48,7 @@
   ],
   "attendance": [
     {
-      "_id": "m7pgh3d20",
+      "_id": "atkd4a29j",
       "studentId": "STU001",
       "name": "Alice Smith",
       "date": "2026-07-12",
@@ -58,7 +58,7 @@
       "whatsappSentAt": "2026-07-12T08:17:00Z"
     },
     {
-      "_id": "4jhq38rni",
+      "_id": "zjg6gdzr2",
       "studentId": "STU002",
       "name": "Bob Johnson",
       "date": "2026-07-12",
@@ -68,7 +68,7 @@
       "whatsappSentAt": "2026-07-12T08:22:00Z"
     },
     {
-      "_id": "zqmfcgkcj",
+      "_id": "oxhkvux6j",
       "studentId": "STU003",
       "name": "Charlie Brown",
       "date": "2026-07-12",
@@ -78,7 +78,7 @@
       "whatsappSentAt": "2026-07-12T08:47:00Z"
     },
     {
-      "_id": "41het5hbt",
+      "_id": "irtaeuq23",
       "studentId": "STU004",
       "name": "David Miller",
       "date": "2026-07-12",
@@ -88,7 +88,7 @@
       "whatsappSentAt": "2026-07-12T08:12:00Z"
     },
     {
-      "_id": "jnv1dubi9",
+      "_id": "m17hsbgi8",
       "studentId": "STU005",
       "name": "Eve Davis",
       "date": "2026-07-12",
@@ -98,7 +98,7 @@
       "whatsappSentAt": "2026-07-12T08:13:00Z"
     },
     {
-      "_id": "un4oxs264",
+      "_id": "vzqliwaez",
       "studentId": "STU001",
       "name": "Alice Smith",
       "date": "2026-07-13",
@@ -107,7 +107,7 @@
       "whatsappStatus": "Not Sent"
     },
     {
-      "_id": "62l1lt81y",
+      "_id": "2vsp7gwd6",
       "studentId": "STU002",
       "name": "Bob Johnson",
       "date": "2026-07-13",
@@ -116,7 +116,7 @@
       "whatsappStatus": "Not Sent"
     },
     {
-      "_id": "cpx332auz",
+      "_id": "lr3g5q4z9",
       "studentId": "STU002",
       "name": "Bob Johnson",
       "date": "2026-07-13",
@@ -125,7 +125,7 @@
       "whatsappStatus": "Not Sent"
     },
     {
-      "_id": "572tivy6f",
+      "_id": "a8ffwcddn",
       "studentId": "STU004",
       "name": "David Miller",
       "date": "2026-07-13",
@@ -134,18 +134,28 @@
       "whatsappStatus": "Not Sent"
     },
     {
-      "_id": "8s5hkvdbg",
+      "_id": "ccueqvlzp",
       "studentId": "STU005",
       "name": "Eve Davis",
       "date": "2026-07-13",
       "status": "Late",
       "timestamp": "2026-07-13T08:50:00Z",
       "whatsappStatus": "Not Sent"
+    },
+    {
+      "_id": "xu9d9xe2i",
+      "studentId": "STU003",
+      "name": "Charlie Brown",
+      "date": "2026-07-13",
+      "status": "Late",
+      "timestamp": "2026-07-16T09:53:03.801Z",
+      "whatsappStatus": "Sent",
+      "whatsappSentAt": "2026-07-16T09:53:03.801Z"
     }
   ],
   "flagged_issues": [
     {
-      "_id": "306j56yqm",
+      "_id": "algwo5f9i",
       "studentId": "STU002",
       "name": "Bob Johnson",
       "date": "2026-07-13",
@@ -154,12 +164,12 @@
         "message": "Bob Johnson has 2 duplicate check-in logs.",
         "records": [
           {
-            "_id": "62l1lt81y",
+            "_id": "2vsp7gwd6",
             "status": "Present",
             "timestamp": "2026-07-13T08:22:00Z"
           },
           {
-            "_id": "cpx332auz",
+            "_id": "lr3g5q4z9",
             "status": "Present",
             "timestamp": "2026-07-13T08:25:00Z"
           }
@@ -167,19 +177,19 @@
       },
       "status": "Pending",
       "aiSuggestion": {
-        "suggestedRecordId": "62l1lt81y",
+        "suggestedRecordId": "2vsp7gwd6",
         "recommendedAction": "Keep Earliest Log",
         "explanation": "Detected duplicate check-ins in close succession. Recommend keeping the earliest check-in record at 01:52 pm (Present) and removing the others.",
         "options": [
           {
             "label": "Keep Earliest Record",
             "action": "keep_record",
-            "value": "62l1lt81y"
+            "value": "2vsp7gwd6"
           },
           {
             "label": "Keep Latest Record",
             "action": "keep_record",
-            "value": "cpx332auz"
+            "value": "lr3g5q4z9"
           },
           {
             "label": "Remove All Check-ins",
@@ -188,10 +198,10 @@
           }
         ]
       },
-      "createdAt": "2026-07-16T09:46:47.669Z"
+      "createdAt": "2026-07-16T09:43:54.407Z"
     },
     {
-      "_id": "kkeombn6s",
+      "_id": "0czr0kj17",
       "studentId": "STU003",
       "name": "Charlie Brown",
       "date": "2026-07-13",
@@ -199,7 +209,7 @@
       "details": {
         "message": "Charlie Brown is enrolled but has no attendance log for 2026-07-13."
       },
-      "status": "Pending",
+      "status": "Resolved",
       "aiSuggestion": {
         "suggestedStatus": "Late",
         "recommendedAction": "Mark as Late",
@@ -222,7 +232,12 @@
           }
         ]
       },
-      "createdAt": "2026-07-16T09:46:47.669Z"
+      "createdAt": "2026-07-16T09:43:54.407Z",
+      "resolvedAt": "2026-07-16T09:53:03.808Z",
+      "resolution": {
+        "action": "resolve_status",
+        "value": "Late"
+      }
     }
   ]
 }
