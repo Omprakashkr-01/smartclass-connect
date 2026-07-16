@@ -1,0 +1,16 @@
+{
+  "name": "school-attendance-backend",
+  "version": "1.0.0",
+  "description": "Backend API for AI school attendance reconciliation",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.5.0"
+  }
+}

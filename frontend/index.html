@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis Attendance: AI-Reconciliation Console</title>
+  <meta name="description" content="Aegis AI Attendance Scan: Administrative Console for School Attendance Reconciliation & Intelligent Flag Resolution.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- i18next CDN -->
+  <script src="https://unpkg.com/i18next@latest/dist/umd/i18next.min.js"></script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-icon">
+          <i data-lucide="shield-check"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Aegis</h1>
+          <span>AI Attendance Scan</span>
+        </div>
+      </div>
+      
+      <nav class="nav-links">
+        <a href="#" id="nav-review-console" class="active"><i data-lucide="layout-dashboard"></i> <span id="nav-txt-review">Review Console</span></a>
+        <a href="#" id="nav-students"><i data-lucide="users"></i> <span id="nav-txt-students">Students</span></a>
+        <a href="#" id="nav-daily-logs"><i data-lucide="calendar"></i> <span id="nav-txt-daily">Daily Logs</span></a>
+        <a href="#" onclick="alert('Settings is locked in demo mode.')"><i data-lucide="settings"></i> <span id="nav-txt-settings">Settings</span></a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Admin Reviewer</span>
+            <span class="user-role">Lead Administrator</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-header">
+        <div class="header-title">
+          <h2>Daily Reconciliation</h2>
+          <p>Scan records, identify inconsistencies, and resolve flags using AI recommendations.</p>
+        </div>
+        
+        <div class="header-actions">
+          <div class="date-picker-wrapper" style="margin-right: 12px;">
+            <label for="lang-select" id="lbl-lang">Language / भाषा</label>
+            <select id="lang-select" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; color: var(--text-primary); font-size: 13px; outline: none; cursor: pointer;">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="bho">भोजपुरी (Bhojpuri)</option>
+            </select>
+          </div>
+          <div class="date-picker-wrapper">
+            <label for="scan-date" id="lbl-reconcile-date">Reconciliation Date</label>
+            <input type="date" id="scan-date" value="2026-07-13">
+          </div>
+          <button id="btn-scan" class="btn btn-primary">
+            <i data-lucide="scan-line"></i> <span id="lbl-run-scan">Run AI Scan</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Status Alerts / Notifications -->
+      <div id="toast-container" class="toast-container"></div>
+
+      <div id="view-review-console">
+        <!-- Overview KPI Cards -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon icon-blue">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-value" id="kpi-scanned">0</span>
+              <span class="kpi-label">Students Scanned</span>
+            </div>
+          </div>
+          
+          <div class="kpi-card">
+            <div class="kpi-icon icon-yellow">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-value" id="kpi-anomalies">0</span>
+              <span class="kpi-label">Anomalies Detected</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon icon-red">
+              <i data-lucide="clock-alert"></i>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-value" id="kpi-pending">0</span>
+              <span class="kpi-label">Pending Reviews</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon icon-green">
+              <i data-lucide="activity"></i>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-value" id="kpi-accuracy">100%</span>
+              <span class="kpi-label">Data Accuracy Rating</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main Dashboard Panels -->
+        <section class="dashboard-body">
+          <!-- Flagged Issues Review Panel -->
+          <div class="review-panel">
+            <div class="panel-header">
+              <h3><i data-lucide="clipboard-list"></i> Flagged Issues Queue</h3>
+              <span class="badge badge-pending" id="badge-pending-count">0 Pending</span>
+            </div>
+
+            <div id="flags-container" class="flags-container">
+              <!-- Dynamic flag cards will be loaded here -->
+              <div class="loading-state">
+                <i data-lucide="loader-2" class="spin"></i>
+                <p>Fetching flagged records...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History/Reconciliation Log Panel -->
+          <div class="history-panel">
+            <div class="panel-header">
+              <h3><i data-lucide="history"></i> Resolution Log</h3>
+            </div>
+
+            <!-- Dynamic Anomaly Chart Section -->
+            <div class="chart-section" style="margin-bottom: 8px; padding: 16px; background: rgba(15, 23, 42, 0.3); border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Anomaly Status Summary</h4>
+                <span id="chart-legend" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">0 Issues</span>
+              </div>
+              <div style="position: relative; height: 160px; display: flex; justify-content: center; align-items: center;">
+                <canvas id="anomalyChart" style="max-height: 160px; max-width: 160px;"></canvas>
+              </div>
+            </div>
+            
+            <div class="table-wrapper">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Issue</th>
+                    <th>Resolution</th>
+                    <th>Resolved At</th>
+                  </tr>
+                </thead>
+                <tbody id="history-list">
+                  <!-- Resolved flags history -->
+                  <tr>
+                    <td colspan="4" class="empty-state">No resolutions logged in this session yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Daily Logs View -->
+      <div id="view-daily-logs" style="display: none;">
+        <section class="daily-logs-panel" style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="background: rgba(16, 185, 129, 0.1); color: var(--color-success); width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <i data-lucide="calendar"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0;">Attendance Daily Logs</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">View completed check-ins and send WhatsApp alerts to parents.</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="search-box-wrapper" style="position: relative;">
+                <input type="text" id="logs-search" placeholder="Search students..." style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px 8px 36px; color: var(--text-primary); font-size: 13px; outline: none; transition: all 0.2s;">
+                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted);"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-wrapper" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: rgba(15, 23, 42, 0.2);">
+            <table class="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="background: rgba(15, 23, 42, 0.4); border-bottom: 1px solid var(--border-color);">
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Student Info</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Grade</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Check-in Time</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Parent Phone</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">WhatsApp Status</th>
+                  <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 160px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="daily-logs-list">
+                <tr>
+                  <td colspan="7" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <i data-lucide="loader-2" class="spin" style="width: 24px; height: 24px; margin-bottom: 12px;"></i>
+                    <p>Loading daily attendance logs...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Students View -->
+      <div id="view-students" style="display: none;">
+        <section class="students-panel" style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="background: rgba(99, 102, 241, 0.1); color: var(--color-primary); width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <i data-lucide="users"></i>
+              </div>
+              <div>
+                <h3 id="lbl-students-title" style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0;">Student Management</h3>
+                <p id="lbl-students-subtitle" style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">Manage enrolled students, their details, and contact numbers.</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="search-box-wrapper" style="position: relative;">
+                <input type="text" id="students-search" placeholder="Search students..." style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px 8px 36px; color: var(--text-primary); font-size: 13px; outline: none; transition: all 0.2s;">
+                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted);"></i>
+              </div>
+              <button id="btn-add-student" class="btn btn-primary" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: var(--color-primary); color: white;" onclick="openStudentModal()">
+                <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
+                <span id="lbl-btn-add-student">Add Student</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="table-wrapper" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: rgba(15, 23, 42, 0.2);">
+            <table class="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="background: rgba(15, 23, 42, 0.4); border-bottom: 1px solid var(--border-color);">
+                  <th id="th-stud-id" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Student ID</th>
+                  <th id="th-stud-name" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Name</th>
+                  <th id="th-stud-grade" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Grade</th>
+                  <th id="th-stud-email" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Email</th>
+                  <th id="th-stud-phone" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Parent Phone</th>
+                  <th id="th-stud-actions" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 180px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-list">
+                <tr>
+                  <td colspan="6" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <i data-lucide="loader-2" class="spin" style="width: 24px; height: 24px; margin-bottom: 12px; display: inline-block;"></i>
+                    <p>Loading enrolled students...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Resolution Modal (For manual status updates / inputs) -->
+  <div id="modal-resolve" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Resolve Custom Status</h4>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-flag-description"></p>
+        <div class="form-group">
+          <label for="modal-status-select">Select New Status</label>
+          <select id="modal-status-select" class="form-control">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Late">Late</option>
+            <option value="Excused">Excused</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button id="btn-modal-submit" class="btn btn-primary">Save Resolution</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Student Modal -->
+  <div id="modal-student" class="modal">
+    <div class="modal-content" style="width: 500px;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+        <h4 id="lbl-modal-student-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text-primary);">Add New Student</h4>
+        <button class="modal-close" onclick="closeStudentModal()" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 14px 0;">
+        <input type="hidden" id="student-db-id">
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-id-input" id="lbl-input-id" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Student ID</label>
+          <input type="text" id="student-id-input" placeholder="e.g. STU006" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-name-input" id="lbl-input-name" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Student Name</label>
+          <input type="text" id="student-name-input" placeholder="e.g. John Doe" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-grade-input" id="lbl-input-grade" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Grade</label>
+          <input type="text" id="student-grade-input" placeholder="e.g. 10th Grade" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-email-input" id="lbl-input-email" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Email Address</label>
+          <input type="email" id="student-email-input" placeholder="e.g. john@school.edu" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-phone-input" id="lbl-input-phone" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Parent Phone Number</label>
+          <input type="text" id="student-phone-input" placeholder="e.g. +1 (555) 019-2834" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+        <button id="lbl-btn-cancel" class="btn btn-secondary" onclick="closeStudentModal()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-secondary);">Cancel</button>
+        <button id="btn-student-submit" class="btn btn-primary" onclick="submitStudentForm()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: var(--color-primary); color: white;">Save Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
