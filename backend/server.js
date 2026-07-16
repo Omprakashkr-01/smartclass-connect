@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { connectDb, getCollection, convertId } from './db.js';
 import { config } from './config.js';
 import { scanAttendanceForDate } from './detector.js';
+import { translateText } from './translationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,6 +86,25 @@ const server = http.createServer(async (req, res) => {
         }
         const result = await scanAttendanceForDate(date);
         sendJson(res, 200, result);
+      } catch (err) {
+        sendJson(res, 500, { error: err.message });
+      }
+    });
+    return;
+  }
+  
+  // POST /api/translate
+  if (req.method === 'POST' && pathname === '/api/translate') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { text, targetLanguage } = JSON.parse(body);
+        if (!text || !targetLanguage) {
+          return sendJson(res, 400, { error: 'Text and targetLanguage fields are required.' });
+        }
+        const translated = await translateText(text, targetLanguage);
+        sendJson(res, 200, { original: text, targetLanguage, translated });
       } catch (err) {
         sendJson(res, 500, { error: err.message });
       }
