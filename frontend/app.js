@@ -228,7 +228,36 @@ async function fetchFlags() {
     const flags = await res.json();
     flagsState = flags;
     
+    // Dynamically compile the persistent admin review log from database records
+    resolutionHistory = flagsState
+      .filter(f => f.status === 'Resolved' || f.status === 'Ignored')
+      .map(f => {
+        const timeStr = f.resolvedAt ? new Date(f.resolvedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
+        
+        let actionLabel = 'Resolved';
+        if (f.status === 'Ignored') {
+          actionLabel = 'Ignore Flag';
+        } else if (f.resolution) {
+          if (f.resolution.action === 'resolve_status') {
+            actionLabel = `Mark ${f.resolution.value}`;
+          } else if (f.resolution.action === 'keep_record') {
+            actionLabel = 'Keep Record';
+          } else if (f.resolution.action === 'delete_all') {
+            actionLabel = 'Delete All Logs';
+          }
+        }
+        
+        return {
+          name: f.name,
+          studentId: f.studentId,
+          issueType: f.issueType,
+          resolution: actionLabel,
+          time: timeStr
+        };
+      });
+    
     renderFlags();
+    renderHistory();
     updateKPIs();
     updateChart();
     
