@@ -124,9 +124,11 @@ function showToast(message, type = 'success') {
   if (type === 'error') icon = 'x-circle';
   if (type === 'warning') icon = 'alert-circle';
   
+  const translated = translateToast(message);
+  
   toast.innerHTML = `
     <i data-lucide="${icon}"></i>
-    <span>${message}</span>
+    <span>${translated}</span>
   `;
   
   toastContainer.appendChild(toast);
@@ -243,7 +245,7 @@ function renderFlags() {
     flagsContainer.innerHTML = `
       <div class="empty-state">
         <i data-lucide="sparkles" style="color: var(--color-success)"></i>
-        <p>All clear! No pending anomalies requiring review.</p>
+        <p>${i18next.t('msg_all_clear')}</p>
       </div>
     `;
     lucide.createIcons();
@@ -261,19 +263,20 @@ function renderFlags() {
     
     // Details content
     let detailsHtml = '';
+    const localizedMsg = i18next.exists(flag.details.message) ? i18next.t(flag.details.message) : flag.details.message;
     if (flag.issueType === 'duplicate') {
       const records = flag.details?.records || [];
       detailsHtml = `
         <div class="flag-details border-duplicate">
-          <p>${flag.details.message}</p>
+          <p>${localizedMsg}</p>
           <div class="duplicate-list">
             ${records.map(r => {
               const time = new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               return `
                 <div class="duplicate-item">
-                  <span>Log ID: <code>${r._id}</code></span>
-                  <span>Status: <span class="badge-status status-${r.status.toLowerCase()}">${r.status}</span></span>
-                  <span>Checked-in: ${time}</span>
+                  <span>${i18next.t('lbl_log_id')}: <code>${r._id}</code></span>
+                  <span>${i18next.t('lbl_status')}: <span class="badge-status status-${r.status.toLowerCase()}">${r.status}</span></span>
+                  <span>${i18next.t('lbl_checked_in')}: ${time}</span>
                 </div>
               `;
             }).join('')}
@@ -283,7 +286,7 @@ function renderFlags() {
     } else {
       detailsHtml = `
         <div class="flag-details border-missing">
-          <p>${flag.details.message}</p>
+          <p>${localizedMsg}</p>
         </div>
       `;
     }
@@ -291,14 +294,15 @@ function renderFlags() {
     // AI Suggestion Box
     let aiBoxHtml = '';
     if (flag.aiSuggestion) {
+      const recAction = i18next.exists(flag.aiSuggestion.recommendedAction) ? i18next.t(flag.aiSuggestion.recommendedAction) : flag.aiSuggestion.recommendedAction;
       aiBoxHtml = `
         <div class="ai-recommendation-box">
           <div class="ai-icon">
             <i data-lucide="sparkles"></i>
           </div>
           <div class="ai-content">
-            <span class="ai-title">AI Suggestion</span>
-            <span class="ai-action">${flag.aiSuggestion.recommendedAction}</span>
+            <span class="ai-title">${i18next.t('lbl_ai_suggestion')}</span>
+            <span class="ai-action">${recAction}</span>
             <span class="ai-reasoning">${flag.aiSuggestion.explanation}</span>
           </div>
         </div>
@@ -326,9 +330,10 @@ function renderFlags() {
           onClickStr = `resolveFlag('${flag._id}', 'delete_all', null, 'Delete All Logs')`;
         }
         
+        const localizedOptLabel = i18next.exists(opt.label) ? i18next.t(opt.label) : opt.label;
         actionsHtml += `
           <button class="btn ${btnClass}" onclick="${onClickStr}">
-            ${opt.label}
+            ${localizedOptLabel}
           </button>
         `;
       });
@@ -337,17 +342,19 @@ function renderFlags() {
     // Ignore manual action
     actionsHtml += `
       <button class="btn btn-action-ignore" onclick="resolveFlag('${flag._id}', 'ignore', null, 'Ignore Flag')">
-        Ignore
+        ${i18next.t('btn_ignore')}
       </button>
     `;
     
+    const localizedMeta = i18next.t('lbl_card_student_meta', { studentId: flag.studentId, date: flag.date });
+    const localizedIssueType = i18next.t(flag.issueType);
     card.innerHTML = `
       <div class="flag-card-header">
         <div class="student-meta">
           <h4>${flag.name}</h4>
-          <span>Student ID: ${flag.studentId} | Date: ${flag.date}</span>
+          <span>${localizedMeta}</span>
         </div>
-        <span class="badge ${badgeType}">${flag.issueType}</span>
+        <span class="badge ${badgeType}">${localizedIssueType}</span>
       </div>
       
       ${detailsHtml}
@@ -410,7 +417,7 @@ function renderHistory() {
   if (resolutionHistory.length === 0) {
     historyList.innerHTML = `
       <tr>
-        <td colspan="4" class="empty-state">No resolutions logged in this session yet.</td>
+        <td colspan="4" class="empty-state">${i18next.t('msg_no_resolutions')}</td>
       </tr>
     `;
     return;
@@ -420,17 +427,19 @@ function renderHistory() {
   
   resolutionHistory.forEach(item => {
     const tr = document.createElement('tr');
+    const localizedResolution = i18next.exists(item.resolution) ? i18next.t(item.resolution) : item.resolution;
+    const localizedIssueType = i18next.t(item.issueType);
     tr.innerHTML = `
       <td>
         <strong style="color: var(--text-primary)">${item.name}</strong><br>
         <span style="font-size: 11px; color: var(--text-muted)">${item.studentId}</span>
       </td>
       <td>
-        <span class="badge ${item.issueType === 'missing' ? 'badge-missing' : 'badge-duplicate'}">${item.issueType}</span>
+        <span class="badge ${item.issueType === 'missing' ? 'badge-missing' : 'badge-duplicate'}">${localizedIssueType}</span>
       </td>
       <td>
         <span class="badge-status status-present" style="background: rgba(99, 102, 241, 0.1); color: #a5b4fc">
-          ${item.resolution}
+          ${localizedResolution}
         </span>
       </td>
       <td>${item.time}</td>
@@ -442,7 +451,7 @@ function renderHistory() {
 // Open manual modal
 function openCustomResolveModal(flagId, studentName) {
   currentModalFlagId = flagId;
-  modalFlagDescription.textContent = `Input custom corrected attendance status for ${studentName}:`;
+  modalFlagDescription.textContent = i18next.t('lbl_custom_resolve_description', { name: studentName });
   modalResolve.classList.add('active');
 }
 
@@ -973,7 +982,60 @@ const i18nResources = {
       "alert-fill-fields": "Please fill out all fields.",
       
       "empty-logs-msg": "No attendance logs found matching filters.",
-      "empty-students-msg": "No students found matching filters."
+      "empty-students-msg": "No students found matching filters.",
+
+      // PRJ-EE44-0071 Translations
+      "lbl-modal-resolve-title": "Resolve Custom Status",
+      "lbl-select-status": "Select New Status",
+      "btn-modal-cancel": "Cancel",
+      "btn-modal-submit": "Save Resolution",
+      "lbl_custom_resolve_description": "Input custom corrected attendance status for {{name}}:",
+      "msg_resolved_marked_status": "Resolved: Attendance marked as {{status}} for {{name}}. Simulated WhatsApp alert sent to parent at {{phone}}.",
+      "msg_resolved_kept_log": "Resolved: Kept check-in log for {{name}}. Simulated WhatsApp alert sent to parent at {{phone}}.",
+      "msg_resolved_deleted_all": "Resolved: Deleted all attendance records for {{name}} on {{date}}.",
+      "msg_ignored_flag": "Ignored flagged issue for {{name}} on {{date}}.",
+      "msg_whatsapp_sent_success": "WhatsApp notification sent successfully for {{name}}.",
+      "msg_whatsapp_sent_failed": "Failed to send WhatsApp notification for {{name}}.",
+      "msg_all_clear": "All clear! No pending anomalies requiring review.",
+      "msg_no_resolutions": "No resolutions logged in this session yet.",
+      "lbl_log_id": "Log ID",
+      "lbl_status": "Status",
+      "lbl_checked_in": "Checked-in",
+      "lbl_ai_suggestion": "AI Suggestion",
+      "btn_ignore": "Ignore",
+      "lbl_card_student_meta": "Student ID: {{studentId}} | Date: {{date}}",
+      "missing": "Missing",
+      "duplicate": "Duplicate",
+      "Student did not check-in on this date.": "Student did not check-in on this date.",
+      "Multiple check-in records detected.": "Multiple check-in records detected.",
+      
+      // AI suggestions & buttons
+      "Mark Present": "Mark Present",
+      "Mark Late": "Mark Late",
+      "Mark Absent": "Mark Absent",
+      "Keep Earliest Log": "Keep Earliest Log",
+      "Keep Latest Log": "Keep Latest Log",
+      "Delete All Logs": "Delete All Logs",
+      "Clarify with Staff": "Clarify with Staff",
+      "Ignore Flag": "Ignore Flag",
+      
+      // showToast notifications
+      "err_invalid_date": "Please select a valid date.",
+      "msg_scan_complete": "AI Scan Complete. Found {{count}} anomalies!",
+      "err_scan_failed": "Failed to trigger scan. Make sure backend is running.",
+      "err_resolve_failed": "Failed to resolve flag.",
+      "err_fetch_students_failed": "Failed to fetch students.",
+      "err_fetch_logs_failed": "Failed to fetch daily logs.",
+      "err_deletion_failed": "Deletion failed.",
+      "err_student_id_exists": "Student ID already exists.",
+      "err_all_fields_required": "All fields are required.",
+      "err_student_not_found": "Student not found.",
+      "err_student_not_found_no_changes": "Student not found or no changes made.",
+      "err_action_required": "Action is required in the request body.",
+      "err_flag_not_found": "Flagged issue not found.",
+      "err_record_to_keep_required": "Record ID to keep must be specified.",
+      "err_record_to_keep_not_found": "Specified attendance record to keep was not found.",
+      "err_resolution_failed": "Resolution submission failed."
     }
   },
   hi: {
@@ -1040,7 +1102,58 @@ const i18nResources = {
       "alert-fill-fields": "कृपया सभी फ़ील्ड भरें।",
       
       "empty-logs-msg": "कोई उपस्थिति लॉग नहीं मिला।",
-      "empty-students-msg": "कोई छात्र नहीं मिला।"
+      "empty-students-msg": "कोई छात्र नहीं मिला।",
+
+      // PRJ-EE44-0071 Translations
+      "lbl-modal-resolve-title": "कस्टम उपस्थिति स्थिति ठीक करें",
+      "lbl-select-status": "नई स्थिति चुनें",
+      "btn-modal-cancel": "रद्द करें",
+      "btn-modal-submit": "समाधान सहेजें",
+      "lbl_custom_resolve_description": "{{name}} के लिए सही उपस्थिति स्थिति दर्ज करें:",
+      "msg_resolved_marked_status": "समाधान: {{name}} के लिए उपस्थिति स्थिति {{status}} दर्ज की गई। अभिभावक को {{phone}} पर व्हाट्सएप संदेश भेजा गया।",
+      "msg_resolved_kept_log": "समाधान: {{name}} का उपस्थिति रिकॉर्ड रखा गया। अभिभावक को {{phone}} पर व्हाट्सएप संदेश भेजा गया।",
+      "msg_resolved_deleted_all": "समाधान: {{date}} को {{name}} के सभी उपस्थिति रिकॉर्ड हटा दिए गए।",
+      "msg_ignored_flag": "{{date}} को {{name}} के लिए चिह्नित विसंगति को अनदेखा किया गया।",
+      "msg_whatsapp_sent_success": "{{name}} के लिए व्हाट्सएप सूचना सफलतापूर्वक भेजी गई।",
+      "msg_whatsapp_sent_failed": "{{name}} के लिए व्हाट्सएप सूचना भेजने में असमर्थ।",
+      "msg_all_clear": "सब ठीक है! कोई लंबित विसंगतियाँ समीक्षा के लिए नहीं हैं।",
+      "msg_no_resolutions": "इस सत्र में अभी तक कोई समाधान इतिहास दर्ज नहीं किया गया है।",
+      "lbl_log_id": "लॉग आईडी",
+      "lbl_status": "स्थिति",
+      "lbl_checked_in": "चेक-इन समय",
+      "lbl_ai_suggestion": "एआई सुझाव",
+      "btn_ignore": "अनदेखा करें",
+      "lbl_card_student_meta": "छात्र आईडी: {{studentId}} | तिथि: {{date}}",
+      "missing": "अनुपस्थित / अनुपलब्ध",
+      "duplicate": "दोहराव",
+      "Student did not check-in on this date.": "छात्र ने इस तिथि को चेक-इन नहीं किया था।",
+      "Multiple check-in records detected.": "एक से अधिक चेक-इन रिकॉर्ड मिले।",
+      
+      "Mark Present": "उपस्थित दर्ज करें",
+      "Mark Late": "विलंब दर्ज करें",
+      "Mark Absent": "अनुपस्थित दर्ज करें",
+      "Keep Earliest Log": "सबसे पहला लॉग रखें",
+      "Keep Latest Log": "सबसे नया लॉग रखें",
+      "Delete All Logs": "सभी लॉग हटाएं",
+      "Clarify with Staff": "कर्मचारियों से स्पष्ट करें",
+      "Ignore Flag": "अनदेखा करें",
+      
+      "err_invalid_date": "कृपया एक मान्य तिथि चुनें।",
+      "msg_scan_complete": "एआई स्कैन पूर्ण। {{count}} विसंगतियाँ पाई गईं!",
+      "err_scan_failed": "स्कैन शुरू करने में विफल। सुनिश्चित करें कि बैकएंड चल रहा है।",
+      "err_resolve_failed": "समाधान सबमिट करने में विफल।",
+      "err_fetch_students_failed": "छात्रों को लोड करने में असमर्थ।",
+      "err_fetch_logs_failed": "दैनिक उपस्थिति रिकॉर्ड लोड करने में असमर्थ।",
+      "err_deletion_failed": "हटाने में विफलता दर्ज की गई।",
+      "err_student_id_exists": "छात्र आईडी पहले से मौजूद है।",
+      "err_all_fields_required": "सभी फ़ील्ड आवश्यक हैं।",
+      "err_student_not_found": "छात्र नहीं मिला।",
+      "err_student_not_found_no_changes": "छात्र नहीं मिला या कोई बदलाव नहीं किया गया।",
+      "err_action_required": "अनुरोध में एक्शन (कार्रवाई) आवश्यक है।",
+      "err_flag_not_found": "चिह्नित मुद्दा नहीं मिला।",
+      "err_record_to_keep_required": "रखने के लिए रिकॉर्ड आईडी निर्दिष्ट करना आवश्यक है।",
+      "err_record_to_keep_not_found": "निर्दिष्ट रखने वाला उपस्थिति रिकॉर्ड नहीं मिला।",
+      "err_resolution_failed": "समाधान सबमिट करने में विफल।"
     }
   },
   bho: {
@@ -1068,7 +1181,7 @@ const i18nResources = {
       "lbl-daily-logs-title": "रोज के हाजिरी रिकॉर्ड",
       "lbl-daily-logs-subtitle": "चेक-इन देखल जाव आ अभिभावकन के व्हाट्सएप अलर्ट भेजल जाव।",
       "th-dl-info": "विद्यार्थी के जानकारी",
-      "th-dl-grade": "क्लास",
+      "th-dl-grade": "Grade",
       "th-dl-status": "स्थिति / हाल",
       "th-dl-time": "चेक-इन समय",
       "th-dl-phone": "अभिभावक के फोन",
@@ -1107,10 +1220,151 @@ const i18nResources = {
       "alert-fill-fields": "कृपा करके सभ जानकारी भरीं।",
       
       "empty-logs-msg": "गड़बड़ी वाला रिकॉर्ड ना मिलल।",
-      "empty-students-msg": "कोई विद्यार्थी ना मिलल।"
+      "empty-students-msg": "कोई विद्यार्थी ना मिलल।",
+
+      // PRJ-EE44-0071 Translations
+      "lbl-modal-resolve-title": "कस्टम स्थिति ठीक करीं",
+      "lbl-select-status": "नया स्थिति चुनीं",
+      "btn-modal-cancel": "छोड़ीं",
+      "btn-modal-submit": "समाधान सहेजीं",
+      "lbl_custom_resolve_description": "{{name}} खातिर सही उपस्थिति स्थिति लिखीं:",
+      "msg_resolved_marked_status": "समाधान: {{name}} खातिर उपस्थिति {{status}} दर्ज भइल। अभिभावक के {{phone}} पर व्हाट्सएप संदेश भेज देहल गइल।",
+      "msg_resolved_kept_log": "समाधान: {{name}} के उपस्थिति रिकॉर्ड सहेजवल गइल। अभिभावक के {{phone}} पर व्हाट्सएप संदेश भेज देहल गइल।",
+      "msg_resolved_deleted_all": "समाधान: {{date}} के {{name}} के सभ उपस्थिति रिकॉर्ड हटा देहल गइल।",
+      "msg_ignored_flag": "{{date}} के {{name}} के गड़बड़ी के अनदेखा कइल गइल।",
+      "msg_whatsapp_sent_success": "{{name}} खातिर व्हाट्सएप संदेश सफलतापूर्वक भेज देहल गइल।",
+      "msg_whatsapp_sent_failed": "{{name}} खातिर व्हाट्सएप संदेश भेजे में गड़बड़ी भइल।",
+      "msg_all_clear": "सभ ठीक बा! जाँच खातिर कौनों गड़बड़ी नईखे बाचल।",
+      "msg_no_resolutions": "एह सत्र में कौनों समाधान इतिहास अभी तक दर्ज नईखे भइल।",
+      "lbl_log_id": "लॉग आईडी",
+      "lbl_status": "स्थिति / हाल",
+      "lbl_checked_in": "चेक-इन समय",
+      "lbl_ai_suggestion": "एआई के सलाह",
+      "btn_ignore": "अनदेखा करीं",
+      "lbl_card_student_meta": "विद्यार्थी आईडी: {{studentId}} | तारीख: {{date}}",
+      "missing": "अनुपस्थित (Missing)",
+      "duplicate": "दुबारा (Duplicate)",
+      "Student did not check-in on this date.": "विद्यार्थी एह तारीख के चेक-इन ना कइले रहन।",
+      "Multiple check-in records detected.": "एक से ढेर चेक-इन रिकॉर्ड मिलल बा।",
+      
+      "Mark Present": "उपस्थित (Present) दर्ज करीं",
+      "Mark Late": "देरी (Late) दर्ज करीं",
+      "Mark Absent": "अनुपस्थित (Absent) दर्ज करीं",
+      "Keep Earliest Log": "सभसे पाहिले के रिकॉर्ड राखीं",
+      "Keep Latest Log": "सभसे नया रिकॉर्ड राखीं",
+      "Delete All Logs": "सभ हाजिरी रिकॉर्ड हटाईं",
+      "Clarify with Staff": "स्टाफ से बात करीं",
+      "Ignore Flag": "अनदेखा करीं",
+      
+      "err_invalid_date": "कृपा करके सही तारीख चुनीं।",
+      "msg_scan_complete": "एआई स्कैन पूरा भइल। {{count}} गड़बड़ी मिलल बा!",
+      "err_scan_failed": "स्कैन शुरू करे में गड़बड़ी भइल। बैकएंड चालू बा कि ना देखीं।",
+      "err_resolve_failed": "समाधान भेजे में गड़बड़ी भइल।",
+      "err_fetch_students_failed": "विद्यार्थी लोग के लोड करे में गड़बड़ी भइल।",
+      "err_fetch_logs_failed": "हाजिरी रिकॉर्ड लोड करे में गड़बड़ी भइल।",
+      "err_deletion_failed": "हटावे में गड़बड़ी भइल।",
+      "err_student_id_exists": "विद्यार्थी आईडी पहिले से बा।",
+      "err_all_fields_required": "सभ जानकारी भरल आवश्यक बा।",
+      "err_student_not_found": "विद्यार्थी ना मिलल।",
+      "err_student_not_found_no_changes": "विद्यार्थी ना मिलल या कौनों बदलाव ना कइल गइल।",
+      "err_action_required": "अनुरोध में एक्शन (काम) जरूरी बा।",
+      "err_flag_not_found": "चिह्नित गड़बड़ी ना मिलल।",
+      "err_record_to_keep_required": "राखे खातिर रिकॉर्ड आईडी देब जरूरी बा।",
+      "err_record_to_keep_not_found": "निर्दिष्ट राखल जाए वाला उपस्थिति रिकॉर्ड ना मिलल।",
+      "err_resolution_failed": "समाधान भेजे में गड़बड़ी भइल।"
     }
   }
 };
+
+// Parse and translate toast messages and system notifications dynamically
+function translateToast(msg) {
+  if (!msg) return '';
+
+  // 1. Resolved: Attendance marked as {status} for {name}. Simulated WhatsApp alert sent to parent at {phone}.
+  const matchStatus = msg.match(/^Resolved:\s+Attendance\s+marked\s+as\s+(\w+)\s+for\s+(.+?)\.\s+Simulated\s+WhatsApp\s+alert\s+sent\s+to\s+parent\s+at\s+(.+?)\.$/);
+  if (matchStatus) {
+    const status = matchStatus[1];
+    const name = matchStatus[2];
+    const phone = matchStatus[3];
+    return i18next.t('msg_resolved_marked_status', { status, name, phone });
+  }
+
+  // 2. Resolved: Kept check-in log for {name}. Simulated WhatsApp alert sent to parent at {phone}.
+  const matchKeep = msg.match(/^Resolved:\s+Kept\s+check-in\s+log\s+for\s+(.+?)\.\s+Simulated\s+WhatsApp\s+alert\s+sent\s+to\s+parent\s+at\s+(.+?)\.$/);
+  if (matchKeep) {
+    const name = matchKeep[1];
+    const phone = matchKeep[2];
+    return i18next.t('msg_resolved_kept_log', { name, phone });
+  }
+
+  // 3. Resolved: Deleted all attendance records for {name} on {date}.
+  const matchDeleteAll = msg.match(/^Resolved:\s+Deleted\s+all\s+attendance\s+records\s+for\s+(.+?)\s+on\s+(.+?)\.$/);
+  if (matchDeleteAll) {
+    const name = matchDeleteAll[1];
+    const date = matchDeleteAll[2];
+    return i18next.t('msg_resolved_deleted_all', { name, date });
+  }
+
+  // 4. Ignored flagged issue for {name} on {date}.
+  const matchIgnore = msg.match(/^Ignored\s+flagged\s+issue\s+for\s+(.+?)\s+on\s+(.+?)\.$/);
+  if (matchIgnore) {
+    const name = matchIgnore[1];
+    const date = matchIgnore[2];
+    return i18next.t('msg_ignored_flag', { name, date });
+  }
+
+  // 5. WhatsApp notification sent successfully for {name}.
+  const matchWaSuccess = msg.match(/^WhatsApp\s+notification\s+sent\s+successfully\s+for\s+(.+?)\.$/);
+  if (matchWaSuccess) {
+    const name = matchWaSuccess[1];
+    return i18next.t('msg_whatsapp_sent_success', { name });
+  }
+
+  // 6. Failed to send WhatsApp notification for {name}.
+  const matchWaFailed = msg.match(/^Failed\s+to\s+send\s+WhatsApp\s+notification\s+for\s+(.+?)\.$/);
+  if (matchWaFailed) {
+    const name = matchWaFailed[1];
+    return i18next.t('msg_whatsapp_sent_failed', { name });
+  }
+
+  // 7. AI Scan Complete. Found {count} anomalies!
+  const matchScan = msg.match(/^AI\s+Scan\s+Complete\.\s+Found\s+(\d+)\s+anomalies!$/);
+  if (matchScan) {
+    const count = matchScan[1];
+    return i18next.t('msg_scan_complete', { count });
+  }
+
+  // Direct static matches mapping
+  const staticKeys = {
+    "Student added successfully": "Student added successfully",
+    "Student updated successfully": "Student updated successfully",
+    "Student deleted successfully": "Student deleted successfully",
+    "Student ID already exists": "err_student_id_exists",
+    "All fields are required": "err_all_fields_required",
+    "Student not found": "err_student_not_found",
+    "Student not found or no changes made": "err_student_not_found_no_changes",
+    "Action is required in the request body.": "err_action_required",
+    "Flagged issue not found.": "err_flag_not_found",
+    "Record ID to keep must be specified.": "err_record_to_keep_required",
+    "Specified attendance record to keep was not found.": "err_record_to_keep_not_found",
+    "Resolution submission failed": "err_resolution_failed",
+    "Failed to fetch students": "err_fetch_students_failed",
+    "Failed to fetch daily logs": "err_fetch_logs_failed",
+    "Deletion failed": "err_deletion_failed",
+    "Please select a valid date.": "err_invalid_date",
+    "Failed to trigger scan. Make sure backend is running.": "err_scan_failed",
+    "Failed to resolve flag.": "err_resolve_failed",
+    "Failed to delete student.": "err_deletion_failed"
+  };
+
+  const cleanedMsg = msg.trim();
+  if (staticKeys[cleanedMsg]) {
+    return i18next.t(staticKeys[cleanedMsg]);
+  }
+
+  // Final fallback
+  return i18next.exists(msg) ? i18next.t(msg) : msg;
+}
 
 // Translate UI elements dynamically using i18next
 function applyLanguage(lang) {
@@ -1142,9 +1396,11 @@ function applyLanguage(lang) {
     const studSearch = document.getElementById('students-search');
     if (studSearch) studSearch.placeholder = i18next.t('students-search-placeholder');
     
-    // Re-render tabular content
+    // Re-render all tabular and card content to reflect language updates
+    renderFlags();
     renderDailyLogs();
     renderStudents();
+    renderHistory();
   });
 }
 
@@ -1160,3 +1416,5 @@ window.submitStudentForm = submitStudentForm;
 window.editStudent = openStudentModal;
 window.deleteStudent = deleteStudent;
 window.applyLanguage = applyLanguage;
+window.closeModal = closeModal;
+

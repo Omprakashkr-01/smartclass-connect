@@ -285,13 +285,13 @@
   <div id="modal-resolve" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h4>Resolve Custom Status</h4>
+        <h4 id="lbl-modal-resolve-title">Resolve Custom Status</h4>
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
         <p id="modal-flag-description"></p>
         <div class="form-group">
-          <label for="modal-status-select">Select New Status</label>
+          <label for="modal-status-select" id="lbl-select-status">Select New Status</label>
           <select id="modal-status-select" class="form-control">
             <option value="Present">Present</option>
             <option value="Absent">Absent</option>
@@ -301,7 +301,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button id="btn-modal-cancel" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
         <button id="btn-modal-submit" class="btn btn-primary">Save Resolution</button>
       </div>
     </div>
