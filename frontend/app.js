@@ -37,6 +37,34 @@ const modalFlagDescription = document.getElementById('modal-flag-description');
 const modalStatusSelect = document.getElementById('modal-status-select');
 const btnModalSubmit = document.getElementById('btn-modal-submit');
 
+// Load translation JSON files dynamically
+async function loadLocales() {
+  try {
+    const [enRes, hiRes, bhoRes] = await Promise.all([
+      fetch('locales/en.json'),
+      fetch('locales/hi.json'),
+      fetch('locales/bho.json')
+    ]);
+    
+    if (!enRes.ok || !hiRes.ok || !bhoRes.ok) {
+      throw new Error('Failed to load one or more localization JSON files');
+    }
+    
+    const en = await enRes.json();
+    const hi = await hiRes.json();
+    const bho = await bhoRes.json();
+    
+    return {
+      en: { translation: en },
+      hi: { translation: hi },
+      bho: { translation: bho }
+    };
+  } catch (err) {
+    console.error('Error loading translation JSON files:', err);
+    return null;
+  }
+}
+
 // Init
 window.addEventListener('DOMContentLoaded', () => {
   // Set default date picker to current date in input if empty
@@ -104,14 +132,16 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize i18next
-  i18next.init({
-    lng: savedLang,
-    resources: i18nResources
-  }, function(err, t) {
-    if (err) return console.error('i18next init failed:', err);
-    // Load initial data and apply default language
-    fetchFlags();
-    applyLanguage(savedLang);
+  loadLocales().then(resources => {
+    i18next.init({
+      lng: savedLang,
+      resources: resources || {}
+    }, function(err, t) {
+      if (err) return console.error('i18next init failed:', err);
+      // Load initial data and apply default language
+      fetchFlags();
+      applyLanguage(savedLang);
+    });
   });
 });
 
@@ -1016,7 +1046,7 @@ function applyLanguage(lang) {
     if (err) return console.error(err);
     
     // Translate static elements using keys
-    const keys = Object.keys(i18nResources.en.translation);
+    const keys = Object.keys(i18next.store.data.en.translation);
     keys.forEach(key => {
       const el = document.getElementById(key);
       if (el) {
