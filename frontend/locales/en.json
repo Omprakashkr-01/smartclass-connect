@@ -36,6 +36,7 @@
   "th-stud-grade": "Grade",
   "th-stud-email": "Email",
   "th-stud-phone": "Parent Phone",
+  "th-stud-lang": "Parent Lang",
   "th-stud-actions": "Actions",
   "lbl-modal-student-title-add": "Add New Student",
   "lbl-modal-student-title-edit": "Edit Student Details",
@@ -44,6 +45,7 @@
   "lbl-input-grade": "Grade",
   "lbl-input-email": "Email Address",
   "lbl-input-phone": "Parent Phone Number",
+  "lbl-input-parent-lang": "Parent Preferred Language",
   "lbl-btn-cancel": "Cancel",
   "btn-student-submit": "Save Student",
   

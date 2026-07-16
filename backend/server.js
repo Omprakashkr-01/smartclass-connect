@@ -158,12 +158,18 @@ const server = http.createServer(async (req, res) => {
     req.on('end', async () => {
       try {
         const attendanceCollection = getCollection('attendance');
+        const studentCollection = getCollection('students');
+        
         const records = await attendanceCollection.find({ _id: convertId(id) }).toArray();
         if (records.length === 0) {
           return sendJson(res, 404, { error: 'Attendance record not found.' });
         }
         
         const record = records[0];
+        
+        const students = await studentCollection.find({ studentId: record.studentId }).toArray();
+        const parentLanguage = students.length > 0 ? (students[0].parentLanguage || 'en') : 'en';
+        const parentPhone = students.length > 0 ? students[0].parentPhone : 'N/A';
         
         await attendanceCollection.updateOne(
           { _id: convertId(id) },
@@ -175,9 +181,18 @@ const server = http.createServer(async (req, res) => {
           }
         );
         
+        const notificationText = `Dear Parent, attendance for ${record.name} on ${record.date} is marked as ${record.status}.`;
+        const translatedNotification = await translateText(notificationText, parentLanguage);
+        console.log(`\n==================================================`);
+        console.log(`[SIMULATED WHATSAPP NOTIFICATION SENT]`);
+        console.log(`To: ${parentPhone}`);
+        console.log(`Preferred Language: ${parentLanguage.toUpperCase()}`);
+        console.log(`Message: "${translatedNotification}"`);
+        console.log(`==================================================\n`);
+        
         sendJson(res, 200, { 
           success: true, 
-          message: `Simulated WhatsApp notification sent to parent of ${record.name} successfully.` 
+          message: `WhatsApp notification sent successfully for ${record.name}.` 
         });
       } catch (err) {
         sendJson(res, 500, { error: err.message });
@@ -204,7 +219,7 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const { studentId, name, grade, email, parentPhone } = JSON.parse(body);
+        const { studentId, name, grade, email, parentPhone, parentLanguage } = JSON.parse(body);
         if (!studentId || !name || !grade || !email || !parentPhone) {
           return sendJson(res, 400, { error: 'All fields are required' });
         }
@@ -215,7 +230,7 @@ const server = http.createServer(async (req, res) => {
           return sendJson(res, 400, { error: 'Student ID already exists' });
         }
         
-        const newStudent = { studentId, name, grade, email, parentPhone };
+        const newStudent = { studentId, name, grade, email, parentPhone, parentLanguage: parentLanguage || 'en' };
         await studentCollection.insertOne(newStudent);
         sendJson(res, 201, { success: true, student: newStudent, message: 'Student added successfully' });
       } catch (err) {
@@ -234,7 +249,7 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const { name, grade, email, parentPhone } = JSON.parse(body);
+        const { name, grade, email, parentPhone, parentLanguage } = JSON.parse(body);
         if (!name || !grade || !email || !parentPhone) {
           return sendJson(res, 400, { error: 'All fields are required' });
         }
@@ -242,7 +257,7 @@ const server = http.createServer(async (req, res) => {
         const studentCollection = getCollection('students');
         const result = await studentCollection.updateOne(
           { _id: convertId(id) },
-          { $set: { name, grade, email, parentPhone } }
+          { $set: { name, grade, email, parentPhone, parentLanguage: parentLanguage || 'en' } }
         );
         
         if (result.modifiedCount === 0) {
@@ -318,13 +333,15 @@ const server = http.createServer(async (req, res) => {
           return sendJson(res, 400, { error: `This issue is already resolved with status: ${flag.status}.` });
         }
 
+        const students = await studentCollection.find({ studentId: flag.studentId }).toArray();
+        const parentLanguage = students.length > 0 ? (students[0].parentLanguage || 'en') : 'en';
+        const parentPhone = students.length > 0 ? students[0].parentPhone : 'N/A';
+        const studentName = students.length > 0 ? students[0].name : flag.name;
+
         let message = '';
 
         if (action === 'resolve_status') {
           const statusValue = value || 'Present';
-          const students = await studentCollection.find({ studentId: flag.studentId }).toArray();
-          const studentName = students.length > 0 ? students[0].name : flag.name;
-          const parentPhone = students.length > 0 ? students[0].parentPhone : 'N/A';
 
           const newRecord = {
             studentId: flag.studentId,
@@ -344,6 +361,15 @@ const server = http.createServer(async (req, res) => {
               resolution: { action, value: statusValue, recordId: newRecord._id }
             } 
           });
+
+          const notificationText = `Dear Parent, attendance for ${studentName} on ${flag.date} is marked as ${statusValue}.`;
+          const translatedNotification = await translateText(notificationText, parentLanguage);
+          console.log(`\n==================================================`);
+          console.log(`[SIMULATED WHATSAPP NOTIFICATION SENT]`);
+          console.log(`To: ${parentPhone}`);
+          console.log(`Preferred Language: ${parentLanguage.toUpperCase()}`);
+          console.log(`Message: "${translatedNotification}"`);
+          console.log(`==================================================\n`);
 
           message = `Resolved: Attendance marked as ${statusValue} for ${studentName}. Simulated WhatsApp alert sent to parent at ${parentPhone}.`;
 
@@ -386,8 +412,15 @@ const server = http.createServer(async (req, res) => {
             } 
           });
 
-          const students = await studentCollection.find({ studentId: flag.studentId }).toArray();
-          const parentPhone = students.length > 0 ? students[0].parentPhone : 'N/A';
+          const notificationText = `Dear Parent, duplicate check-in resolved for ${flag.name} on ${flag.date}. Checked-in record kept.`;
+          const translatedNotification = await translateText(notificationText, parentLanguage);
+          console.log(`\n==================================================`);
+          console.log(`[SIMULATED WHATSAPP NOTIFICATION SENT]`);
+          console.log(`To: ${parentPhone}`);
+          console.log(`Preferred Language: ${parentLanguage.toUpperCase()}`);
+          console.log(`Message: "${translatedNotification}"`);
+          console.log(`==================================================\n`);
+
           message = `Resolved: Kept check-in log for ${flag.name}. Simulated WhatsApp alert sent to parent at ${parentPhone}.`;
 
         } else if (action === 'delete_all') {

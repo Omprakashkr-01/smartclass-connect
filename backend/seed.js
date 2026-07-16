@@ -1,11 +1,11 @@
 import { connectDb, getCollection } from './db.js';
 
 const mockStudents = [
-  { studentId: 'STU001', name: 'Alice Smith', grade: '10th Grade', email: 'alice@school.edu', parentPhone: '+1 (555) 019-2834' },
-  { studentId: 'STU002', name: 'Bob Johnson', grade: '10th Grade', email: 'bob@school.edu', parentPhone: '+1 (555) 014-9821' },
-  { studentId: 'STU003', name: 'Charlie Brown', grade: '10th Grade', email: 'charlie@school.edu', parentPhone: '+1 (555) 017-3849' },
-  { studentId: 'STU004', name: 'David Miller', grade: '10th Grade', email: 'david@school.edu', parentPhone: '+1 (555) 012-7743' },
-  { studentId: 'STU005', name: 'Eve Davis', grade: '10th Grade', email: 'eve@school.edu', parentPhone: '+1 (555) 015-8832' }
+  { studentId: 'STU001', name: 'Alice Smith', grade: '10th Grade', email: 'alice@school.edu', parentPhone: '+1 (555) 019-2834', parentLanguage: 'en' },
+  { studentId: 'STU002', name: 'Bob Johnson', grade: '10th Grade', email: 'bob@school.edu', parentPhone: '+1 (555) 014-9821', parentLanguage: 'hi' },
+  { studentId: 'STU003', name: 'Charlie Brown', grade: '10th Grade', email: 'charlie@school.edu', parentPhone: '+1 (555) 017-3849', parentLanguage: 'bho' },
+  { studentId: 'STU004', name: 'David Miller', grade: '10th Grade', email: 'david@school.edu', parentPhone: '+1 (555) 012-7743', parentLanguage: 'en' },
+  { studentId: 'STU005', name: 'Eve Davis', grade: '10th Grade', email: 'eve@school.edu', parentPhone: '+1 (555) 015-8832', parentLanguage: 'hi' }
 ];
 
 const mockAttendance = [

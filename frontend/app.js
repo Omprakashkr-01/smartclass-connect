@@ -790,7 +790,7 @@ function renderStudents() {
     let emptyMsg = i18next.t('empty-students-msg');
     listEl.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+        <td colspan="7" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
           <i data-lucide="info" style="width: 24px; height: 24px; margin-bottom: 12px; display: inline-block; color: var(--text-muted);"></i>
           <p>${emptyMsg}</p>
         </td>
@@ -817,6 +817,7 @@ function renderStudents() {
       <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;">${s.grade}</td>
       <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;">${s.email}</td>
       <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;">${s.parentPhone}</td>
+      <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;"><code>${(s.parentLanguage || 'en').toUpperCase()}</code></td>
       <td style="padding: 14px 18px; text-align: right;">
         <button class="btn btn-action-resolve" style="padding: 6px 12px; font-size: 12px; font-weight: 600; margin-right: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="editStudent('${s._id}')">
           <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
@@ -842,6 +843,7 @@ function openStudentModal(id = null) {
   const gradeInput = document.getElementById('student-grade-input');
   const emailInput = document.getElementById('student-email-input');
   const phoneInput = document.getElementById('student-phone-input');
+  const langSelect = document.getElementById('student-lang-select');
   const dbIdInput = document.getElementById('student-db-id');
   
   if (id) {
@@ -855,6 +857,7 @@ function openStudentModal(id = null) {
     gradeInput.value = student.grade;
     emailInput.value = student.email;
     phoneInput.value = student.parentPhone;
+    langSelect.value = student.parentLanguage || 'en';
     dbIdInput.value = student._id;
   } else {
     modalTitle.textContent = i18next.t('lbl-modal-student-title-add');
@@ -864,6 +867,7 @@ function openStudentModal(id = null) {
     gradeInput.value = '10th Grade';
     emailInput.value = '';
     phoneInput.value = '';
+    langSelect.value = 'en';
     dbIdInput.value = '';
   }
   
@@ -880,6 +884,7 @@ async function submitStudentForm() {
   const gradeInput = document.getElementById('student-grade-input');
   const emailInput = document.getElementById('student-email-input');
   const phoneInput = document.getElementById('student-phone-input');
+  const langSelect = document.getElementById('student-lang-select');
   const dbId = document.getElementById('student-db-id').value;
   
   const studentId = idInput.value.trim();
@@ -887,6 +892,7 @@ async function submitStudentForm() {
   const grade = gradeInput.value.trim();
   const email = emailInput.value.trim();
   const parentPhone = phoneInput.value.trim();
+  const parentLanguage = langSelect.value;
   
   if (!studentId || !name || !grade || !email || !parentPhone) {
     const alertMsg = i18next.t('alert-fill-fields');
@@ -894,7 +900,7 @@ async function submitStudentForm() {
     return;
   }
   
-  const payload = { studentId, name, grade, email, parentPhone };
+  const payload = { studentId, name, grade, email, parentPhone, parentLanguage };
   
   try {
     let res;

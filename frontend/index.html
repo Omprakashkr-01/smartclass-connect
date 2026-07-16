@@ -263,12 +263,13 @@
                   <th id="th-stud-grade" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Grade</th>
                   <th id="th-stud-email" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Email</th>
                   <th id="th-stud-phone" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Parent Phone</th>
+                  <th id="th-stud-lang" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Parent Lang</th>
                   <th id="th-stud-actions" style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 180px;">Actions</th>
                 </tr>
               </thead>
               <tbody id="students-list">
                 <tr>
-                  <td colspan="6" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                  <td colspan="7" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
                     <i data-lucide="loader-2" class="spin" style="width: 24px; height: 24px; margin-bottom: 12px; display: inline-block;"></i>
                     <p>Loading enrolled students...</p>
                   </td>
@@ -335,6 +336,14 @@
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
           <label for="student-phone-input" id="lbl-input-phone" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Parent Phone Number</label>
           <input type="text" id="student-phone-input" placeholder="e.g. +1 (555) 019-2834" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="student-lang-select" id="lbl-input-parent-lang" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Parent Preferred Language</label>
+          <select id="student-lang-select" class="form-control" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+            <option value="en">English</option>
+            <option value="hi">Hindi (हिन्दी)</option>
+            <option value="bho">Bhojpuri (भोजपुरी)</option>
+          </select>
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 14px;">

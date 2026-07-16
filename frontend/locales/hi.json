@@ -36,6 +36,7 @@
   "th-stud-grade": "कक्षा",
   "th-stud-email": "ईमेल",
   "th-stud-phone": "अभिभावक का फोन",
+  "th-stud-lang": "अभिभावक भाषा",
   "th-stud-actions": "कार्रवाई",
   "lbl-modal-student-title-add": "नया छात्र जोड़ें",
   "lbl-modal-student-title-edit": "छात्र विवरण संपादित करें",
@@ -44,6 +45,7 @@
   "lbl-input-grade": "कक्षा / ग्रेड",
   "lbl-input-email": "ईमेल पता",
   "lbl-input-phone": "अभिभावक का फोन नंबर",
+  "lbl-input-parent-lang": "अभिभावक की पसंदीदा भाषा",
   "lbl-btn-cancel": "रद्द करें",
   "btn-student-submit": "छात्र सहेजें",
   
