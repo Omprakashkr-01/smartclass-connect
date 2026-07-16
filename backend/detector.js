@@ -2,6 +2,7 @@ import { getCollection } from './db.js';
 import { fetchDailyAttendance } from './attendanceService.js';
 import { generateSuggestionForFlag } from './ai_engine.js';
 import { config } from './config.js';
+import { translateText } from './translationService.js';
 
 /**
  * Uses OpenAI GPT-3.5 to analyze rosters and logs to identify anomalies.
@@ -201,6 +202,25 @@ export async function scanAttendanceForDate(date) {
     if (existing.length === 0) {
       await flagsCollection.insertOne(anomaly);
       savedCount++;
+      
+      // Notify staff/admin about the new flagged entry
+      try {
+        const staffPhone = process.env.STAFF_PHONE || '+1 (555) 010-9999';
+        const staffLanguage = 'en'; // default to English for admin notifications
+        const rawAlertText = `Alert to Staff: New attendance anomaly detected for student ${anomaly.name} (${anomaly.studentId}) on ${anomaly.date}. Issue Type: ${anomaly.issueType}. Recommended Action: ${anomaly.aiSuggestion ? anomaly.aiSuggestion.recommendedAction : 'Review records'}.`;
+        
+        // Translate alert if needed (mocked/translated via OpenAI)
+        const translatedAlert = await translateText(rawAlertText, staffLanguage);
+        
+        console.log(`\n==================================================`);
+        console.log(`[SIMULATED WHATSAPP NOTIFICATION SENT TO STAFF]`);
+        console.log(`To: ${staffPhone} (Staff/Admin)`);
+        console.log(`Preferred Language: ${staffLanguage.toUpperCase()}`);
+        console.log(`Message: "${translatedAlert}"`);
+        console.log(`==================================================\n`);
+      } catch (waErr) {
+        console.warn('[Detector] Failed to send staff notification:', waErr.message);
+      }
     }
   }
 
