@@ -36,6 +36,7 @@
         <a href="#" id="nav-review-console" class="active"><i data-lucide="layout-dashboard"></i> <span id="nav-txt-review">Review Console</span></a>
         <a href="#" id="nav-students"><i data-lucide="users"></i> <span id="nav-txt-students">Students</span></a>
         <a href="#" id="nav-daily-logs"><i data-lucide="calendar"></i> <span id="nav-txt-daily">Daily Logs</span></a>
+        <a href="#" id="nav-circulars"><i data-lucide="megaphone"></i> <span id="nav-txt-circulars">Circulars & Timetables</span></a>
         <a href="#" onclick="alert('Settings is locked in demo mode.')"><i data-lucide="settings"></i> <span id="nav-txt-settings">Settings</span></a>
       </nav>
       
@@ -279,6 +280,95 @@
           </div>
         </section>
       </div>
+
+      <!-- Circulars View -->
+      <div id="view-circulars" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: start;">
+          <!-- Left Column: Create Form -->
+          <section style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+              <div style="background: rgba(99, 102, 241, 0.1); color: var(--color-primary); width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <i data-lucide="megaphone"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Create Announcement</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Create new circular or timetable.</p>
+              </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Type</label>
+                <select id="circular-type" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+                  <option value="circular">Circular</option>
+                  <option value="timetable">Timetable</option>
+                </select>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Title (English)</label>
+                <input type="text" id="circular-title-input" placeholder="e.g. Mid-term Exam Schedule" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Content (English)</label>
+                <textarea id="circular-content-input" placeholder="Write announcement details..." rows="6" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none; resize: vertical; font-family: inherit;"></textarea>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Target Language</label>
+                <select id="circular-lang-select" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-primary); outline: none;">
+                  <option value="all">All Parents (Preferred Language)</option>
+                  <option value="en">English Only</option>
+                  <option value="hi">Hindi Only</option>
+                  <option value="bho">Bhojpuri Only</option>
+                </select>
+              </div>
+              
+              <button id="btn-create-circular" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border-radius: 8px; font-weight: 600; border: none; background: var(--color-primary); color: white; cursor: pointer; margin-top: 10px;">
+                <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                <span>Create & Distribute</span>
+              </button>
+            </div>
+          </section>
+          
+          <!-- Right Column: Circulars Sent List -->
+          <section style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: rgba(16, 185, 129, 0.1); color: var(--color-success); width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                  <i data-lucide="archive"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Distribution History</h3>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">View previously distributed announcements.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-wrapper" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: rgba(15, 23, 42, 0.2);">
+              <table class="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="background: rgba(15, 23, 42, 0.4); border-bottom: 1px solid var(--border-color);">
+                    <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Type</th>
+                    <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Title</th>
+                    <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Target Lang</th>
+                    <th style="padding: 14px 18px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; text-align: right; width: 220px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="circulars-list">
+                  <tr>
+                    <td colspan="4" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                      <i data-lucide="info" style="width: 24px; height: 24px; margin-bottom: 12px; display: inline-block;"></i>
+                      <p>No circulars or timetables sent yet.</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -349,6 +439,36 @@
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 14px;">
         <button id="lbl-btn-cancel" class="btn btn-secondary" onclick="closeStudentModal()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-secondary);">Cancel</button>
         <button id="btn-student-submit" class="btn btn-primary" onclick="submitStudentForm()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: var(--color-primary); color: white;">Save Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Translations Modal -->
+  <div id="modal-translations" class="modal">
+    <div class="modal-content" style="width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 16px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text-primary);">View Translations</h4>
+        <button class="modal-close" onclick="closeTranslationsModal()" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; border: 1px solid var(--border-color); padding: 16px;">
+          <span style="font-size: 11px; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">English (EN)</span>
+          <h5 id="trans-title-en" style="margin: 8px 0 4px 0; font-size: 15px; color: var(--text-primary); font-weight: 600;"></h5>
+          <p id="trans-content-en" style="margin: 0; font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; line-height: 1.5;"></p>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; border: 1px solid var(--border-color); padding: 16px;">
+          <span style="font-size: 11px; font-weight: 600; color: var(--color-success); text-transform: uppercase; letter-spacing: 0.5px;">Hindi (HI)</span>
+          <h5 id="trans-title-hi" style="margin: 8px 0 4px 0; font-size: 15px; color: var(--text-primary); font-weight: 600;"></h5>
+          <p id="trans-content-hi" style="margin: 0; font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; line-height: 1.5;"></p>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; border: 1px solid var(--border-color); padding: 16px;">
+          <span style="font-size: 11px; font-weight: 600; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px;">Bhojpuri (BHO)</span>
+          <h5 id="trans-title-bho" style="margin: 8px 0 4px 0; font-size: 15px; color: var(--text-primary); font-weight: 600;"></h5>
+          <p id="trans-content-bho" style="margin: 0; font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; line-height: 1.5;"></p>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+        <button class="btn btn-secondary" onclick="closeTranslationsModal()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-secondary);">Close</button>
       </div>
     </div>
   </div>

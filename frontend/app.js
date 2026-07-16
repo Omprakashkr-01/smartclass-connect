@@ -23,6 +23,23 @@ const viewReviewConsole = document.getElementById('view-review-console');
 const viewDailyLogs = document.getElementById('view-daily-logs');
 const viewStudents = document.getElementById('view-students');
 const modalStudent = document.getElementById('modal-student');
+const navCirculars = document.getElementById('nav-circulars');
+const viewCirculars = document.getElementById('view-circulars');
+const circularsType = document.getElementById('circular-type');
+const circularTitleInput = document.getElementById('circular-title-input');
+const circularContentInput = document.getElementById('circular-content-input');
+const circularLangSelect = document.getElementById('circular-lang-select');
+const btnCreateCircular = document.getElementById('btn-create-circular');
+const circularsList = document.getElementById('circulars-list');
+const modalTranslations = document.getElementById('modal-translations');
+const transTitleEn = document.getElementById('trans-title-en');
+const transContentEn = document.getElementById('trans-content-en');
+const transTitleHi = document.getElementById('trans-title-hi');
+const transContentHi = document.getElementById('trans-content-hi');
+const transTitleBho = document.getElementById('trans-title-bho');
+const transContentBho = document.getElementById('trans-content-bho');
+
+let circularsState = [];
 
 // KPI elements
 const kpiScanned = document.getElementById('kpi-scanned');
@@ -82,9 +99,11 @@ window.addEventListener('DOMContentLoaded', () => {
     navReviewConsole.classList.add('active');
     navDailyLogs.classList.remove('active');
     navStudents.classList.remove('active');
+    navCirculars.classList.remove('active');
     viewReviewConsole.style.display = 'block';
     viewDailyLogs.style.display = 'none';
     viewStudents.style.display = 'none';
+    viewCirculars.style.display = 'none';
   });
   
   navDailyLogs.addEventListener('click', (e) => {
@@ -92,9 +111,11 @@ window.addEventListener('DOMContentLoaded', () => {
     navDailyLogs.classList.add('active');
     navReviewConsole.classList.remove('active');
     navStudents.classList.remove('active');
+    navCirculars.classList.remove('active');
     viewReviewConsole.style.display = 'none';
     viewDailyLogs.style.display = 'block';
     viewStudents.style.display = 'none';
+    viewCirculars.style.display = 'none';
     fetchDailyLogs();
   });
 
@@ -103,11 +124,28 @@ window.addEventListener('DOMContentLoaded', () => {
     navStudents.classList.add('active');
     navReviewConsole.classList.remove('active');
     navDailyLogs.classList.remove('active');
+    navCirculars.classList.remove('active');
     viewReviewConsole.style.display = 'none';
     viewDailyLogs.style.display = 'none';
     viewStudents.style.display = 'block';
+    viewCirculars.style.display = 'none';
     fetchStudents();
   });
+
+  navCirculars.addEventListener('click', (e) => {
+    e.preventDefault();
+    navCirculars.classList.add('active');
+    navReviewConsole.classList.remove('active');
+    navDailyLogs.classList.remove('active');
+    navStudents.classList.remove('active');
+    viewReviewConsole.style.display = 'none';
+    viewDailyLogs.style.display = 'none';
+    viewStudents.style.display = 'none';
+    viewCirculars.style.display = 'block';
+    fetchCirculars();
+  });
+
+  btnCreateCircular.addEventListener('click', createCircular);
 
   scanDateInput.addEventListener('change', () => {
     if (viewDailyLogs.style.display === 'block') {
@@ -1111,17 +1149,143 @@ function applyLanguage(lang) {
   });
 }
 
-// Bind to window to allow HTML onclick access
-window.sendWhatsApp = sendWhatsApp;
-window.filterLogs = renderDailyLogs;
-window.fetchDailyLogs = fetchDailyLogs;
-window.fetchStudents = fetchStudents;
-window.renderStudents = renderStudents;
-window.openStudentModal = openStudentModal;
-window.closeStudentModal = closeStudentModal;
-window.submitStudentForm = submitStudentForm;
-window.editStudent = openStudentModal;
-window.deleteStudent = deleteStudent;
-window.applyLanguage = applyLanguage;
-window.closeModal = closeModal;
+window.distributeCircular = distributeCircular;
+window.viewTranslations = viewTranslations;
+window.closeTranslationsModal = closeTranslationsModal;
+window.fetchCirculars = fetchCirculars;
+
+// Circulars & Timetables management logic
+async function fetchCirculars() {
+  try {
+    const res = await fetch(`${API_BASE}/circulars`);
+    if (!res.ok) throw new Error('Failed to fetch circulars');
+    
+    circularsState = await res.json();
+    renderCirculars();
+  } catch (error) {
+    showToast('Failed to fetch circulars.', 'error');
+    console.error(error);
+  }
+}
+
+function renderCirculars() {
+  if (circularsState.length === 0) {
+    circularsList.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty-state" style="padding: 48px; text-align: center; color: var(--text-muted);">
+          <i data-lucide="info" style="width: 24px; height: 24px; margin-bottom: 12px; display: inline-block;"></i>
+          <p>No circulars or timetables sent yet.</p>
+        </td>
+      </tr>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  circularsList.innerHTML = '';
+  circularsState.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border-color)';
+    
+    const displayType = c.type === 'timetable' ? '📅 Timetable' : '📢 Circular';
+    const displayLang = c.targetLanguage === 'all' ? 'All (Auto-Preferred)' : c.targetLanguage.toUpperCase();
+    
+    tr.innerHTML = `
+      <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;"><strong>${displayType}</strong></td>
+      <td style="padding: 14px 18px; color: var(--text-primary); font-size: 13px; font-weight: 500;">${c.title}</td>
+      <td style="padding: 14px 18px; color: var(--text-secondary); font-size: 13px;"><code>${displayLang}</code></td>
+      <td style="padding: 14px 18px; text-align: right;">
+        <button class="btn btn-action-resolve" style="padding: 6px 12px; font-size: 12px; font-weight: 600; margin-right: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="viewTranslations('${c._id}')">
+          <i data-lucide="languages" style="width: 12px; height: 12px;"></i>
+          <span>Translations</span>
+        </button>
+        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: var(--color-success);" onclick="distributeCircular('${c._id}')">
+          <i data-lucide="send" style="width: 12px; height: 12px;"></i>
+          <span>Distribute</span>
+        </button>
+      </td>
+    `;
+    circularsList.appendChild(tr);
+  });
+  lucide.createIcons();
+}
+
+async function createCircular() {
+  const type = circularsType.value;
+  const title = circularTitleInput.value.trim();
+  const content = circularContentInput.value.trim();
+  const targetLanguage = circularLangSelect.value;
+
+  if (!title || !content) {
+    showToast('Please enter both title and content.', 'warning');
+    return;
+  }
+
+  btnCreateCircular.disabled = true;
+  btnCreateCircular.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Translating...`;
+  lucide.createIcons();
+
+  try {
+    const res = await fetch(`${API_BASE}/circulars`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, title, content, targetLanguage })
+    });
+
+    if (!res.ok) throw new Error('Failed to create circular');
+
+    const data = await res.json();
+    showToast(data.message, 'success');
+    
+    // Clear inputs
+    circularTitleInput.value = '';
+    circularContentInput.value = '';
+    
+    await fetchCirculars();
+  } catch (error) {
+    showToast('Failed to create circular.', 'error');
+    console.error(error);
+  } finally {
+    btnCreateCircular.disabled = false;
+    btnCreateCircular.innerHTML = `<i data-lucide="send"></i> Create & Distribute`;
+    lucide.createIcons();
+  }
+}
+
+async function distributeCircular(id) {
+  try {
+    const res = await fetch(`${API_BASE}/circulars/${id}/distribute`, {
+      method: 'POST'
+    });
+
+    if (!res.ok) throw new Error('Failed to distribute circular');
+
+    const data = await res.json();
+    showToast(data.message, 'success');
+  } catch (error) {
+    showToast('Failed to distribute circular.', 'error');
+    console.error(error);
+  }
+}
+
+function viewTranslations(id) {
+  const circular = circularsState.find(c => c._id === id);
+  if (!circular) return;
+
+  const t = circular.translations;
+  transTitleEn.textContent = t.en?.title || circular.title;
+  transContentEn.textContent = t.en?.content || circular.content;
+
+  transTitleHi.textContent = t.hi?.title || 'No translation';
+  transContentHi.textContent = t.hi?.content || 'No translation';
+
+  transTitleBho.textContent = t.bho?.title || 'No translation';
+  transContentBho.textContent = t.bho?.content || 'No translation';
+
+  modalTranslations.classList.add('active');
+}
+
+function closeTranslationsModal() {
+  modalTranslations.classList.remove('active');
+}
 

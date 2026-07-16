@@ -456,6 +456,139 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/circulars
+  if (req.method === 'GET' && pathname === '/api/circulars') {
+    try {
+      const circularCollection = getCollection('circulars');
+      const circulars = await circularCollection.find({}).toArray();
+      sendJson(res, 200, circulars);
+    } catch (err) {
+      sendJson(res, 500, { error: err.message });
+    }
+    return;
+  }
+
+  // POST /api/circulars
+  if (req.method === 'POST' && pathname === '/api/circulars') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { type, title, content, targetLanguage } = JSON.parse(body);
+        if (!type || !title || !content || !targetLanguage) {
+          return sendJson(res, 400, { error: 'All fields are required' });
+        }
+        
+        // Auto-translate using OpenAI GPT-3.5 API based on selected target language
+        const translations = {
+          en: { title, content },
+          hi: { title: '', content: '' },
+          bho: { title: '', content: '' }
+        };
+        
+        try {
+          if (targetLanguage === 'all' || targetLanguage === 'hi') {
+            translations.hi.title = await translateText(title, 'hi');
+            translations.hi.content = await translateText(content, 'hi');
+          } else {
+            translations.hi.title = title;
+            translations.hi.content = content;
+          }
+          
+          if (targetLanguage === 'all' || targetLanguage === 'bho') {
+            translations.bho.title = await translateText(title, 'bho');
+            translations.bho.content = await translateText(content, 'bho');
+          } else {
+            translations.bho.title = title;
+            translations.bho.content = content;
+          }
+        } catch (transErr) {
+          console.warn('[Server] Circular translation failed, using English fallback:', transErr.message);
+          translations.hi = { title, content };
+          translations.bho = { title, content };
+        }
+        
+        const circularCollection = getCollection('circulars');
+        const newCircular = {
+          type,
+          title,
+          content,
+          targetLanguage,
+          translations,
+          createdAt: new Date().toISOString()
+        };
+        
+        const result = await circularCollection.insertOne(newCircular);
+        newCircular._id = result.insertedId || newCircular._id;
+        
+        sendJson(res, 201, { success: true, circular: newCircular, message: 'Circular created and translated successfully' });
+      } catch (err) {
+        sendJson(res, 500, { error: err.message });
+      }
+    });
+    return;
+  }
+
+  // POST /api/circulars/:id/distribute
+  if (req.method === 'POST' && pathname.startsWith('/api/circulars/') && pathname.endsWith('/distribute')) {
+    const segments = pathname.split('/');
+    const id = segments[3];
+    
+    try {
+      const circularCollection = getCollection('circulars');
+      const studentCollection = getCollection('students');
+      
+      const circulars = await circularCollection.find({ _id: convertId(id) }).toArray();
+      if (circulars.length === 0) {
+        return sendJson(res, 404, { error: 'Circular not found.' });
+      }
+      const circular = circulars[0];
+      
+      const students = await studentCollection.find({}).toArray();
+      
+      console.log(`\n==================================================`);
+      console.log(`[SIMULATED CIRCULAR DISTRIBUTION START]`);
+      console.log(`Title: ${circular.title}`);
+      console.log(`Type: ${circular.type.toUpperCase()}`);
+      console.log(`--------------------------------------------------`);
+      
+      let counts = { en: 0, hi: 0, bho: 0 };
+      
+      for (const student of students) {
+        const parentLanguage = student.parentLanguage || 'en';
+        const parentPhone = student.parentPhone || 'N/A';
+        
+        // Select appropriate translated content based on parent's language preference
+        const trans = circular.translations[parentLanguage] || circular.translations['en'];
+        
+        console.log(`To: ${parentPhone} (${student.name}'s Parent) [Lang: ${parentLanguage.toUpperCase()}]`);
+        console.log(`Title: "${trans.title}"`);
+        console.log(`Message: "${trans.content}"`);
+        console.log(`- - - - - - - - - - - - - - - - - - - - - - - - - -`);
+        
+        if (counts[parentLanguage] !== undefined) {
+          counts[parentLanguage]++;
+        } else {
+          counts.en++;
+        }
+      }
+      
+      console.log(`[SIMULATED CIRCULAR DISTRIBUTION COMPLETE]`);
+      console.log(`Total distributed: ${students.length} parents.`);
+      console.log(`Language breakdown: English: ${counts.en}, Hindi: ${counts.hi}, Bhojpuri: ${counts.bho}`);
+      console.log(`==================================================\n`);
+      
+      sendJson(res, 200, {
+        success: true,
+        message: `Circular distributed to ${students.length} parents in their preferred languages.`,
+        breakdown: counts
+      });
+    } catch (err) {
+      sendJson(res, 500, { error: err.message });
+    }
+    return;
+  }
+
   // --- Static Frontend File Serving ---
   
   // Default to index.html for root path

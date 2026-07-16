@@ -239,5 +239,51 @@
         "value": "Late"
       }
     }
+  ],
+  "circulars": [
+    {
+      "_id": "93k27ae20",
+      "type": "circular",
+      "title": "Mid-term Exam Notice",
+      "content": "Please note that the mid-term exams will start next week. Prepare well.",
+      "targetLanguage": "all",
+      "translations": {
+        "en": {
+          "title": "Mid-term Exam Notice",
+          "content": "Please note that the mid-term exams will start next week. Prepare well."
+        },
+        "hi": {
+          "title": "[Mock Translation to hi]: Mid-term Exam Notice",
+          "content": "[Mock Translation to hi]: Please note that the mid-term exams will start next week. Prepare well."
+        },
+        "bho": {
+          "title": "[Mock Translation to bho]: Mid-term Exam Notice",
+          "content": "[Mock Translation to bho]: Please note that the mid-term exams will start next week. Prepare well."
+        }
+      },
+      "createdAt": "2026-07-16T10:08:38.941Z"
+    },
+    {
+      "_id": "a71kwet4l",
+      "type": "circular",
+      "title": "Mid-term Exam Notice",
+      "content": "Please note that the mid-term exams will start next week. Prepare well.",
+      "targetLanguage": "all",
+      "translations": {
+        "en": {
+          "title": "Mid-term Exam Notice",
+          "content": "Please note that the mid-term exams will start next week. Prepare well."
+        },
+        "hi": {
+          "title": "[Mock Translation to hi]: Mid-term Exam Notice",
+          "content": "[Mock Translation to hi]: Please note that the mid-term exams will start next week. Prepare well."
+        },
+        "bho": {
+          "title": "[Mock Translation to bho]: Mid-term Exam Notice",
+          "content": "[Mock Translation to bho]: Please note that the mid-term exams will start next week. Prepare well."
+        }
+      },
+      "createdAt": "2026-07-16T10:09:15.903Z"
+    }
   ]
 }
